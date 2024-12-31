@@ -39,3 +39,8 @@ variable "number_elastic_ips" {
   description = "The list of EIP allocation IDs for the NAT gateways."
   type        = number
 }
+
+variable "vpc_flow_logs_role_name" {
+  description = "The name of the IAM role for the VPC flow logs."
+  type        = string
+}

@@ -8,4 +8,5 @@ module "vpc_module" {
   number_of_private_subnets = var.number_of_private_subnets
   number_of_natgateways     = var.number_of_natgateways
   number_elastic_ips        = var.number_elastic_ips
+  vpc_flow_logs_role_name   = var.vpc_flow_logs_role_name
 }
