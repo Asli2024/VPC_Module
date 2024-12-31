@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "IGW" {
 
 }
 
-resource "aws_route_table" "public" {
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main_vpc.id
 
   route {
@@ -28,7 +28,7 @@ resource "aws_route_table" "public" {
   }
 }
 
-resource "aws_subnet" "public" {
+resource "aws_subnet" "public_subnet" {
   count                   = var.number_of_public_subnets
   vpc_id                  = aws_vpc.main_vpc.id
   cidr_block              = var.public_subnet_cidr_blocks[count.index]
@@ -41,11 +41,11 @@ resource "aws_subnet" "public" {
 
 resource "aws_route_table_association" "public_rt_association" {
   count          = var.number_of_public_subnets
-  subnet_id      = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
+  subnet_id      = aws_subnet.public_subnet[count.index].id
+  route_table_id = aws_route_table.public_rt.id
 }
 
-resource "aws_subnet" "private" {
+resource "aws_subnet" "private_subnet" {
   count             = var.number_of_private_subnets
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = var.private_subnet_cidr_block[count.index]
@@ -55,7 +55,7 @@ resource "aws_subnet" "private" {
   }
 }
 
-resource "aws_route_table" "private" {
+resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
     Name = "main_private_rt"
@@ -64,8 +64,8 @@ resource "aws_route_table" "private" {
 
 resource "aws_route_table_association" "private_rt_association" {
   count          = var.number_of_private_subnets
-  subnet_id      = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private_subnet[count.index].id
+  route_table_id = aws_route_table.private_rt.id
 }
 
 
