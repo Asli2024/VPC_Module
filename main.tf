@@ -2,18 +2,23 @@ resource "aws_vpc" "main_vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = var.enable_dns_support
   enable_dns_hostnames = var.enable_dns_hostnames
-  tags = {
-    Name = "main_vpc"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_vpc"
+    }
+  )
 }
 
 resource "aws_internet_gateway" "IGW" {
   vpc_id = aws_vpc.main_vpc.id
 
-  tags = {
-    Name = "main_igw"
-  }
-
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_igw"
+    }
+  )
 }
 
 resource "aws_route_table" "public_rt" {
@@ -23,9 +28,13 @@ resource "aws_route_table" "public_rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.IGW.id
   }
-  tags = {
-    Name = "main_public_rt"
-  }
+
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_public_rt"
+    }
+  )
 }
 
 resource "aws_subnet" "public_subnet" {
@@ -34,9 +43,12 @@ resource "aws_subnet" "public_subnet" {
   cidr_block              = var.public_subnet_cidr_blocks[count.index]
   availability_zone       = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
   map_public_ip_on_launch = true
-  tags = {
-    Name = "main_public_subnet_${count.index}"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_public_subnet_${count.index}"
+    }
+  )
 }
 
 resource "aws_route_table_association" "public_rt_association" {
@@ -50,16 +62,23 @@ resource "aws_subnet" "private_subnet" {
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = var.private_subnet_cidr_block[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index % length(data.aws_availability_zones.available.names)]
-  tags = {
-    Name = "main_private_subnet_${count.index}"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_private_subnet_${count.index}"
+    }
+  )
+
 }
 
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.main_vpc.id
-  tags = {
-    Name = "main_private_rt"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_private_rt"
+    }
+  )
 }
 
 resource "aws_route_table_association" "private_rt_association" {
@@ -73,16 +92,22 @@ resource "aws_nat_gateway" "nat" {
   count         = var.number_of_natgateways
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public_subnet[count.index].id
-  tags = {
-    Name = "main_nat_${count.index}"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_nat_${count.index}"
+    }
+  )
 }
 
 resource "aws_eip" "nat" {
   count = var.number_elastic_ips
-  tags = {
-    Name = "main_nat_eip_${count.index}"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_nat_eip_${count.index}"
+    }
+  )
 }
 
 resource "aws_flow_log" "vpc_flow_log" {
@@ -91,18 +116,24 @@ resource "aws_flow_log" "vpc_flow_log" {
   vpc_id          = aws_vpc.main_vpc.id
   iam_role_arn    = aws_iam_role.vpc_flow_logs_role.arn
 
-  tags = {
-    Name = "vpc_flow_log"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "vpc_flow_log"
+    }
+  )
 }
 
 resource "aws_cloudwatch_log_group" "main_cloudwatch_log" {
   name              = "main_cloudwatch_log"
   retention_in_days = 7
 
-  tags = {
-    Name = "main_cloudwatch_log"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "main_cloudwatch_log"
+    }
+  )
 }
 
 resource "aws_iam_role" "vpc_flow_logs_role" {
@@ -158,9 +189,12 @@ resource "aws_iam_role_policy" "vpc_flow_logs_role_policy" {
 resource "aws_s3_bucket" "flow_logs_bucket" {
   bucket = var.s3_bucket_name
 
-  tags = {
-    Name = "flow_logs_bucket"
-  }
+  tags = merge(
+    var.common_tags,
+    {
+      Name = "flow_logs_bucket"
+    }
+  )
 }
 
 resource "aws_s3_bucket_versioning" "versioning_configuration" {
@@ -193,33 +227,14 @@ resource "aws_flow_log" "vpc_flow_log_s3" {
   log_destination_type = "s3"
   traffic_type         = "ALL"
   vpc_id               = aws_vpc.main_vpc.id
-  iam_role_arn         = aws_iam_role.s3_role.arn
+  iam_role_arn         = aws_iam_role.vpc_flow_logs_role.arn
 
-  tags = {
-    Name = "vpc_flow_log_s3"
-  }
-}
-
-resource "aws_iam_role" "s3_role" {
-  name               = "s3_role"
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  tags = merge(
+    var.common_tags,
     {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "vpc-flow-logs.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
+      Name = "vpc_flow_log_s3"
     }
-  ]
-}
-EOF
-
-  tags = {
-    Name = "s3_role"
-  }
+  )
 }
 
 data "aws_iam_policy_document" "flow_logs_bucket_policy" {

@@ -69,3 +69,13 @@ variable "s3_bucket_name" {
   type        = string
   default     = ""
 }
+
+variable "common_tags" {
+  description = "A map of tags to apply to all resources"
+  type        = map(string)
+  default = {
+    Environment = "dev"
+    Project     = "VPC_Module"
+  }
+}
+

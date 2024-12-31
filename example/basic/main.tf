@@ -12,4 +12,5 @@ module "vpc_module" {
   enable_dns_hostnames      = var.enable_dns_hostnames
   enable_dns_support        = var.enable_dns_support
   s3_bucket_name            = var.s3_bucket_name
+  common_tags               = var.common_tags
 }
