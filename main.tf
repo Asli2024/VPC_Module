@@ -1,7 +1,7 @@
 resource "aws_vpc" "main_vpc" {
   cidr_block           = var.vpc_cidr_block
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  enable_dns_support   = var.enable_dns_support
+  enable_dns_hostnames = var.enable_dns_hostnames
   tags = {
     Name = "main_vpc"
   }
@@ -72,7 +72,7 @@ resource "aws_route_table_association" "private_rt_association" {
 resource "aws_nat_gateway" "nat" {
   count         = var.number_of_natgateways
   allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
+  subnet_id     = aws_subnet.public_subnet[count.index].id
   tags = {
     Name = "main_nat_${count.index}"
   }
@@ -156,7 +156,7 @@ resource "aws_iam_role_policy" "vpc_flow_logs_role_policy" {
 }
 
 resource "aws_s3_bucket" "flow_logs_bucket" {
-  bucket = "your-flow-logs-bucket-name"
+  bucket = var.s3_bucket_name
 
   tags = {
     Name = "flow_logs_bucket"

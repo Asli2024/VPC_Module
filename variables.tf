@@ -4,11 +4,6 @@ variable "region" {
   default     = ""
 }
 
-variable "availability_zones" {
-  description = "List of availability zones to distribute the subnets across"
-  type        = list(string)
-  default     = []
-}
 variable "vpc_cidr_block" {
   description = "The CIDR block for the VPC"
   type        = string

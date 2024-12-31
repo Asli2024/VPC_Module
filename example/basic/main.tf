@@ -9,4 +9,7 @@ module "vpc_module" {
   number_of_natgateways     = var.number_of_natgateways
   number_elastic_ips        = var.number_elastic_ips
   vpc_flow_logs_role_name   = var.vpc_flow_logs_role_name
+  enable_dns_hostnames      = var.enable_dns_hostnames
+  enable_dns_support        = var.enable_dns_support
+  s3_bucket_name            = var.s3_bucket_name
 }
